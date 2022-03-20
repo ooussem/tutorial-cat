@@ -12,7 +12,7 @@ trait Applicative[Box[_]] extends Functor[Box] {
 
   // TODO - implement using pure and app
   override def map[A, B](boxA: Box[A])(f: A => B): Box[B] = {
-    ap(pure(f))(boxA)
+    ap[A ,B](pure(f))(boxA)
   }
 
 }

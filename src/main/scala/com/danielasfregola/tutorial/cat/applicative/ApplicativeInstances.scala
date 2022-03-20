@@ -9,18 +9,18 @@ object ApplicativeInstances {
   implicit val maybeApplicative: Applicative[Maybe] = new Applicative[Maybe] {
     override def pure[A](a: A): Maybe[A] = Just(a)
 
-    override def ap[A, B](boxF: Maybe[A => B])(boxA: Maybe[A]): Maybe[B] = boxF match {
-      case Just(f) => map(boxA)(f)
-      case Empty => Empty
+    override def ap[A, B](boxF: Maybe[A => B])(boxA: Maybe[A]): Maybe[B] = (boxF, boxA) match {
+      case (Just(f), Just(a)) => pure(f(a))
+      case _ => Empty
     }
   }
 
   implicit val zeroOrMoreApplicative: Applicative[ZeroOrMore] = new Applicative[ZeroOrMore] {
     override def pure[A](a: A): ZeroOrMore[A] = OneOrMore(a, Zero)
 
-    override def ap[A, B](boxF: ZeroOrMore[A => B])(boxA: ZeroOrMore[A]): ZeroOrMore[B] = boxF match {
-      case OneOrMore(head, tail) => map(ap(tail)(boxA))(head)
-      case Zero => Zero
+    override def ap[A, B](boxF: ZeroOrMore[A => B])(boxA: ZeroOrMore[A]): ZeroOrMore[B] = (boxF, boxA) match {
+      case (OneOrMore(headF, tailF), OneOrMore(headA, tailA)) => pure(headF(headA)).append(ap(boxF)(tailA))
+      case _ => Zero
     }
   }
 
